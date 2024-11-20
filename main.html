@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Tac+One" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&family=Tac+One&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+        <title>Slicr.</title>
+        <div id="titleDiv">
+            <h1 style="margin-left: 2%; margin-top: 0; margin-bottom: 10px; margin-right: 0;">Slicr.</h1>
+        </div>
+        <style>
+            :root { overscroll-behavior: none; }
+            html, body {
+                min-height: 100vh;
+            }
+            #titleDiv {
+                box-shadow: #000000 0px 0px 5px;
+                margin: 0;
+                background: #37ce62;
+                text-align: center;
+            }
+            h1 {
+                padding: 0;
+                box-sizing: border-box;
+                user-select: none;
+                font-family: 'Tac One', sans-serif;
+                font-size: 96px;
+                color: #f8fffb;
+            }
+            h2, h3, p {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                user-select: none;
+                font-family: 'Rubik', sans-serif;
+            }
+            body {
+                background-color: #f8fffb;
+                margin: 0;
+                overflow-x: hidden;
+            }
+            #imgContainer, #imgPreview {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box; /* This ensures padding and borders are included in the width/height calculations */
+            }  
+            #imgContainer {
+                width: 80vw; /* 80% of the viewport width */
+                height: 45vw; /* This is 80vw * (9 / 16) */
+                max-height: 80vh; /* 80% of the viewport height */
+                max-width: 142.222vh; /* This is 80vh * (16 / 9) */
+                position: relative;
+                margin: 20px auto; /* This centers the container horizontally and vertically */
+                position: relative;
+                background-color: rgb(221, 231, 220);
+                border-radius: 15px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                transition: border border-color 0.3s;
+            }
+            #imgContainer.highlight, img {
+                border: 2px dashed;
+                border-color: #37ce62;
+                border-radius: 15px;
+
+            }
+            #imgPreview {
+                display: none;
+                position: absolute;
+                object-fit: contain;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+            #submitButton {
+                /* The initial state of the button is hidden */
+                display: inline-block;
+                visibility: hidden; 
+                opacity: 0;
+                position: absolute; /* Position it over the image container */
+                top: 50%; /* Center vertically relative to the parent */
+                left: 50%; /* Center horizontally relative to the parent */
+                transform: translate(-50%, -50%); /* Offset the button by half its width and height */
+                background-color: white; /* Match the upload button color */
+                color: black;
+                border: none;
+                padding: 25px 50px;
+                border-radius: 25px;
+                font-size: 32px;
+                font-weight: 500;
+                font-family: 'Rubik', sans-serif;
+                cursor: pointer;
+                transition: color 0.3s;
+                z-index: 10; /* Ensure it's above the image */
+            }
+            #submitButton:enabled:hover {
+                color: #37ce62; /* Slightly darker shade on hover */
+            }
+            #submitButton:disabled {
+                background-color: #ccc; /* Dim color when the button is disabled */
+                cursor: not-allowed; /* Cursor to indicate the button is not clickable */
+            }
+            .upload-button {
+                display: inline-block;
+                font-size: 32px; /* Size of the icon */
+                width: 100px; /* Width of the button */
+                height: 100px; /* Height of the button */
+                line-height: 100px; /* Center the icon vertically */
+                text-align: center;
+                border-radius: 50%; /* Make it round */
+                background-color: #37ce62; /* Your desired button color */
+                color: white;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            .upload-button:hover {
+                background-color: rgb(86, 152, 89); /* Change the button color on hover */
+            }
+            .upload-button i {
+                vertical-align: middle;
+            }
+            .upload-button.highlight {
+                background-color: white;
+                color: #37ce62;
+            }
+            #loadingLabel {
+                position: absolute;
+                text-align: center;
+                display: none;
+                font-family: 'Rubik', sans-serif;
+            }
+            #overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-color: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000; /* Ensure it's above everything else */
+            }
+            .modal {
+                font-size: 225%;
+                background-color: white;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+                text-align: center;
+            }
+            .modal button {
+                font-family: 'Rubik', sans-serif;
+                font-weight: 500;
+                padding: 10px 20px;
+                font-size: 95%;
+                margin-top: 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                background-color: white;
+            }
+            .modal button:hover {
+                background-color: #37ce62;
+            }
+            #footer {
+                box-sizing: border-box;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                background-color: #37ce62;
+                box-shadow: #000000 0px 0px 5px;
+            }
+            .footerText {
+                color: #f8fffb;
+            }
+            .imageContainers {
+                height: 85%;
+                width: 85%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-left: 7%;
+                position: relative;
+            }
+            .imageContainersMobile {
+                height: 85%;
+                width: 85%;
+                align-items: center;
+                justify-content: center;
+                margin-left: 7%;
+                position: relative;
+            }
+            .exampleImgContainer {
+                height: 100%;
+                width: 100%;
+                object-fit: cover;
+                overflow: hidden;
+                border: 5px solid #bbbbbb;
+                margin: 5px 5px 10px 5px;
+            }
+            .scrollable {
+                display: flex;
+                width: 100%;
+                height: 100%;
+                overflow-x: scroll;
+                scroll-snap-type: x mandatory;
+                scroll-behavior: smooth;
+            }
+            .scrollableMobile {
+                display: flex;
+                width: 100%;
+                height: 100%;
+                overflow-x: scroll;
+                scroll-snap-type: x mandatory;
+                scroll-behavior: smooth;
+            }
+            .scrollable img {
+                border: 0px;
+                border-radius: 0px;
+                width: 350px;
+                height: 350px;
+                object-fit: cover;
+                scroll-snap-align: center;
+                flex: 0 0 100%;
+            }
+            .scrollableMobile img{
+                border: 0px;
+                border-radius: 0px;
+                width: 350px;
+                height: 500px;
+                object-fit: cover;
+                scroll-snap-align: center;
+                flex: 0 0 100%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h3 style="text-align: center; font-size: 36px;">Upload an image to slice it into two.</h2>
+        <div>
+            <form id="imgForm" enctype="multipart/form-data">
+        </div>
+        <div id="imgContainer">
+            <label id="loadingLabel"><h2>Loading...</h2></label>
+                <input id="submitButton" type="submit" value="Split"/>
+                <label for="imgSelector" class="upload-button">
+                    <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                    <input id="imgSelector" name="image" type="file" accept="image/*" style="display: none;"/>
+                </label>
+            <img id="imgPreview"></img>
+        </div>
+        </form>
+        <div id="section2">
+            <h2 style="text-align: center; font-size: 52px;">Seamless Slides Made Simple.</h2>
+            <p style="text-align: center; font-size: 24px;">Slicr allows you to add an entirely new dimension of interaction to your post with a click of a button. <br>View the effect in action for yourself:</p>
+            <div class="imageContainers">
+                <div class="exampleImgContainer">
+                    <div class="scrollable">
+                        <img src="example_image_left.jpg">
+                        <img src="example_image_right.jpg">
+                    </div>
+                </div>
+                <div class="exampleImgContainer">
+                    <div class="scrollable">
+                        <img src="example_image2_left.jpeg">
+                        <img src="example_image2_right.jpeg">
+                    </div>
+                </div>
+                <div class="exampleImgContainer">
+                    <div class="scrollable">
+                        <img src="example_image3_left.jpeg">
+                        <img src="example_image3_right.jpeg">
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        <div id="overlay" style="display:none;"></div>
+        <div id="footer">
+            <p style="text-align: center; color: black;">Created by Adrian Bennett</p>
+        </div>
+    </body>
+</html>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var imgContainer = document.getElementById('imgContainer');
+        var imgSelector = document.getElementById('imgSelector');
+        var imgForm = document.getElementById('imgForm');
+        var submitButton = document.getElementById('submitButton');
+        var uploadButtonLabel = document.querySelector('.upload-button');
+        var imgPreview = document.getElementById('imgPreview');
+        var loadingLabel = document.getElementById('loadingLabel');
+
+        // Setup drag and drop listeners
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            imgContainer.addEventListener(eventName, preventDefaults, false);
+            imgForm.addEventListener(eventName, preventDefaults, false);
+        });
+    
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    
+        ['dragenter', 'dragover'].forEach(eventName => {
+            imgContainer.addEventListener(eventName, () => imgContainer.classList.add('highlight'), false);
+            uploadButtonLabel.addEventListener(eventName, () => uploadButtonLabel.classList.add('highlight'), false);
+        });
+    
+        ['dragleave', 'drop'].forEach(eventName => {
+            imgContainer.addEventListener(eventName, () => imgContainer.classList.remove('highlight'), false);
+            uploadButtonLabel.addEventListener(eventName, () => uploadButtonLabel.classList.remove('highlight'), false);
+        });
+    
+        imgContainer.addEventListener('drop', handleDrop, false);
+        uploadButtonLabel.addEventListener('drop', handleDrop, false);
+    
+        function handleDrop(e) {
+            let dt = e.dataTransfer;
+            let files = dt.files;
+            imgSelector.files = files; // Assigns dropped files to file input
+            handleFiles(files);
+        }
+    
+        imgSelector.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+        imgPreview.addEventListener('load', function() {
+            enableSubmitButton();
+        });
+    
+        function handleFiles(files) {
+            uploadButtonLabel.style.visibility = 'hidden';
+            uploadButtonLabel.style.opacity = '0';
+            loadingLabel.style.display = 'block';
+            if (files.length > 0) {
+                previewFile(files[0]); // Preview the first file
+            }
+        }
+    
+        function previewFile(file) {
+            let reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onloadend = function() {
+                imgPreview.src = reader.result;
+                imgPreview.style.display = 'block';
+            };
+        }
+    
+        function enableSubmitButton() {
+            loadingLabel.style.display = 'none';
+            submitButton.style.visibility = 'visible';
+            submitButton.style.opacity = '1';
+        }
+    
+        // Form submission with fetch
+        imgForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+    
+            fetch('http://127.0.0.1:5000/split', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) return response.blob();
+                throw new Error('Network response was not ok.');
+            })
+            .then(blob => {
+                const link1 = document.createElement('a');
+                link1.href = window.URL.createObjectURL(blob);
+                link1.download = 'split_images.zip';
+                document.body.appendChild(link1);
+                link1.click();
+                document.body.removeChild(link1);
+
+                // Now show the overlay with the message and button
+                const overlay = document.getElementById('overlay');
+                overlay.innerHTML = `
+                    <div class="modal">
+                        <p>Complete, Files have been downloaded!</p>
+                        <button onclick="window.location.reload();">Refresh</button>
+                    </div>
+                `;
+                overlay.style.display = 'flex'; // Show the overlay
+            })
+            .catch(error => {
+                console.error('Error:', error);
+
+                const overlay = document.getElementById('overlay');
+                overlay.innerHTML = `
+                    <div class="modal">
+                        <p>There seems to have been an error.</p>
+                        <button onclick="window.location.reload();">Try Later</button>
+                    </div>
+                `;
+                overlay.style.display = 'flex'; // Show the overlay
+            });
+        });
+    });
+
+    function isMobile() {
+        const regex = /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+        return regex.test(navigator.userAgent);
+    }
+    let isMobileDevice = isMobile();
+    if (isMobileDevice) {
+        document.querySelector('.imageContainers').classList.add('imageContainersMobile');
+        document.querySelector('.imageContainers').classList.remove('imageContainers');
+        document.querySelectorAll('.scrollable').forEach(img => img.classList.add('scrollableMobile'));
+        document.querySelectorAll('.scrollable').forEach(img => img.classList.remove('scrollable'));
+    }
+
+</script>
+</html>
